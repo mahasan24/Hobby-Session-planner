@@ -71,4 +71,34 @@ router.post("/:id/unattend", async (req, res) => {
   }
 });
 
+
+router.get("/:id/manage", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { code } = req.query;
+    const session = await Session.findById(id);
+    if (!session) return res.status(404).json({ error: "Not found" });
+    if (session.managementCode !== code)
+      return res.status(403).json({ error: "Invalid code" });
+    res.json(session);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.delete("/:id/manage", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { code } = req.query;
+    const session = await Session.findById(id);
+    if (!session) return res.status(404).json({ error: "Not found" });
+    if (session.managementCode !== code)
+      return res.status(403).json({ error: "Invalid code" });
+    await Session.findByIdAndDelete(id);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
