@@ -31,7 +31,7 @@ export default function SessionDetails() {
   const [privateRequired, setPrivateRequired] = useState(false);
   const [privateInput, setPrivateInput] = useState("");
   const [mapUrl, setMapUrl] = useState<string | null>(null);
-
+//AI GENERATED
   const fetchSession = async (privateCode?: string) => {
     setLoading(true);
     try {

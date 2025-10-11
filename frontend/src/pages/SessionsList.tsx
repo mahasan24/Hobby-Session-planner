@@ -25,7 +25,7 @@ export default function SessionsList() {
       .then(setSessions)
       .catch(() => alert("Failed to load sessions"));
   }, []);
-
+//AI GENERATED
   const filterSessions = (sessions: SessionType[]) => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);

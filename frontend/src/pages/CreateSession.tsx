@@ -59,7 +59,7 @@ export default function CreateSession() {
       alert("Copy failed");
     }
   };
-
+//AI GENERATED
   const getAiSuggestion = async () => {
     setLoadingSuggestion(true);
     try {

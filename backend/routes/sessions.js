@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
+//AI GENERATED
 router.put('/:id', async (req, res) => {
   try {
     const session = await Session.findById(req.params.id);
@@ -85,7 +85,7 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
+//AI GENERATED
 router.post("/:id/attend", async (req, res) => {
   try {
     const id = req.params.id;
@@ -112,7 +112,7 @@ router.post("/:id/attend", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
+//AI GENERATED
 router.post("/:id/unattend", async (req, res) => {
   try {
     const id = req.params.id;
