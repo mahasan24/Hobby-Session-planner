@@ -92,7 +92,6 @@ npm install
 Create a `.env` file in the `backend` directory:
 ```env
 # backend/.env
-MONGODB_URI=mongodb+srv://mahasan24_db_user:Password@cluster0.hzyfine.mongodb.net/hobby?retryWrites=true&w=majority&appName=Cluster0
 PORT=4000
 ```
 
