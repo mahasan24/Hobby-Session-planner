@@ -53,7 +53,9 @@ export default function SessionDetails() {
             if (Array.isArray(json) && json.length) {
               const lat = json[0].lat;
               const lon = json[0].lon;
-              setMapUrl(`https://www.openstreetmap.org/export/embed.html?bbox=${lon}%2C${lat}%2C${lon}%2C${lat}&layer=mapnik&marker=${lat}%2C${lon}`);
+              setMapUrl(
+                `https://www.openstreetmap.org/export/embed.html?bbox=${lon}%2C${lat}%2C${lon}%2C${lat}&layer=mapnik&marker=${lat}%2C${lon}`
+              );
             } else {
               setMapUrl(null);
             }
@@ -71,32 +73,43 @@ export default function SessionDetails() {
     }
   };
 
-  useEffect(() => { if (id) fetchSession(); }, [id]);
+  useEffect(() => {
+    if (id) fetchSession();
+  }, [id]);
 
-  const openPrivate = () => { if (!privateInput) return alert("Paste private code"); fetchSession(privateInput); };
+  const openPrivate = () => {
+    if (!privateInput) return alert("Paste private code");
+    fetchSession(privateInput);
+  };
 
   const copyCode = (code?: string | null) => {
     if (!code) return alert("No code to copy");
-    navigator.clipboard.writeText(code).then(() => alert("Code copied!")).catch(() => alert("Copy failed"));
+    navigator.clipboard
+      .writeText(code)
+      .then(() => alert("Code copied!"))
+      .catch(() => alert("Copy failed"));
   };
 
   const shareSession = () => {
     const url = window.location.href;
     if (navigator.share) {
-      navigator.share({
-        title: session?.title || "Hobby Session",
-        text: `Join me at: ${session?.title}`,
-        url: url
-      }).catch(() => {
-        copyToClipboard(url);
-      });
+      navigator
+        .share({
+          title: session?.title || "Hobby Session",
+          text: `Join me at: ${session?.title}`,
+          url: url,
+        })
+        .catch(() => {
+          copyToClipboard(url);
+        });
     } else {
       copyToClipboard(url);
     }
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard
+      .writeText(text)
       .then(() => alert("Link copied to clipboard!"))
       .catch(() => alert("Failed to copy link"));
   };
@@ -107,7 +120,7 @@ export default function SessionDetails() {
       const res = await fetch(`${API}/api/attendance/${id}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name }),
       });
       const data = await res.json();
       if (res.ok && data.attendanceCode) {
@@ -128,7 +141,7 @@ export default function SessionDetails() {
       const res = await fetch(`${API}/api/attendance/${id}/leave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: myCode })
+        body: JSON.stringify({ code: myCode }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -149,7 +162,7 @@ export default function SessionDetails() {
       const res = await fetch(`${API}/api/attendance/${id}/remove`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: managerCode, attendanceCode, attendeeName })
+        body: JSON.stringify({ code: managerCode, attendanceCode, attendeeName }),
       });
       const data = await res.json();
       if (res.ok && data.success) fetchSession();
@@ -162,16 +175,45 @@ export default function SessionDetails() {
   const editSession = async () => {
     const mg = prompt("Enter management code to edit:");
     if (!mg) return;
+
     const newTitle = prompt("New title:", session?.title || "");
-    if (!newTitle) return;
+    if (newTitle === null) return;
+
+    const newDescription = prompt("New description:", session?.description || "");
+    if (newDescription === null) return;
+
+    const newDate = prompt("New date (YYYY-MM-DD):", session?.date || "");
+    if (newDate === null) return;
+
+    const newTime = prompt("New time (HH:MM):", session?.time || "");
+    if (newTime === null) return;
+
+    const newLocation = prompt("New location:", session?.location || "");
+    if (newLocation === null) return;
+
+    const newMaxParticipants = prompt(
+      "Max participants (0 for unlimited):",
+      String(session?.maxParticipants || 0)
+    );
+    if (newMaxParticipants === null) return;
+
     try {
       const res = await fetch(`${API}/api/sessions/${id}?code=${mg}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle })
+        body: JSON.stringify({
+          title: newTitle || session?.title,
+          description: newDescription || session?.description,
+          date: newDate || session?.date,
+          time: newTime || session?.time,
+          location: newLocation || session?.location,
+          maxParticipants: Number(newMaxParticipants) || 0,
+        }),
       });
-      if (res.ok) fetchSession();
-      else {
+      if (res.ok) {
+        alert("Session updated successfully!");
+        fetchSession();
+      } else {
         const data = await res.json();
         alert(data.error || "Edit failed");
       }
@@ -185,7 +227,9 @@ export default function SessionDetails() {
     if (!mg) return;
     if (!window.confirm("Delete session permanently?")) return;
     try {
-      const res = await fetch(`${API}/api/sessions/${id}?code=${mg}`, { method: "DELETE" });
+      const res = await fetch(`${API}/api/sessions/${id}?code=${mg}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       if (res.ok && data.success) {
         alert("Deleted - redirecting to list");
@@ -197,14 +241,21 @@ export default function SessionDetails() {
   };
 
   if (loading) return <div className="session-details"><p>Loading...</p></div>;
+
   if (privateRequired) {
     return (
       <div className="session-details">
         <h2>Private session</h2>
         <p>Paste the private code to open:</p>
         <div style={{ display: "flex", gap: 8 }}>
-          <input value={privateInput} onChange={(e) => setPrivateInput(e.target.value)} placeholder="Private code" />
-          <button className="btn" onClick={openPrivate}>Open</button>
+          <input
+            value={privateInput}
+            onChange={(e) => setPrivateInput(e.target.value)}
+            placeholder="Private code"
+          />
+          <button className="btn" onClick={openPrivate}>
+            Open
+          </button>
         </div>
       </div>
     );
@@ -213,9 +264,16 @@ export default function SessionDetails() {
 
   return (
     <div className="session-details">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: 16,
+        }}
+      >
         <h2 style={{ margin: 0 }}>{session.title}</h2>
-        <button 
+        <button
           onClick={shareSession}
           style={{
             padding: "8px 16px",
@@ -224,16 +282,21 @@ export default function SessionDetails() {
             border: "none",
             borderRadius: 4,
             cursor: "pointer",
-            fontSize: "0.9em"
+            fontSize: "0.9em",
           }}
         >
           📤 Share
         </button>
       </div>
-      
+
       <p>{session.description}</p>
-      <p>{session.date} · {session.time}</p>
-      <p>Attending: {(session.attendees || []).length}{session.maxParticipants ? ` / ${session.maxParticipants}` : ""}</p>
+      <p>
+        {session.date} · {session.time}
+      </p>
+      <p>
+        Attending: {(session.attendees || []).length}
+        {session.maxParticipants ? ` / ${session.maxParticipants}` : ""}
+      </p>
 
       {session.managementCode && (
         <button onClick={() => copyCode(session.managementCode)}>Copy Management Code</button>
@@ -245,10 +308,32 @@ export default function SessionDetails() {
       {session.location && (
         <div style={{ marginTop: 12 }}>
           {mapUrl ? (
-            <iframe title="map" src={mapUrl} style={{ width: "100%", height: 240, border: 0, borderRadius: 8 }} />
+            <iframe
+              title="map"
+              src={mapUrl}
+              style={{ width: "100%", height: 240, border: 0, borderRadius: 8 }}
+            />
           ) : (
-            <div style={{ padding: 10, borderRadius: 8, background: "#fafafa", border: "1px solid #eee" }}>
-              <div>Map not found for this location. <a href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(session.location || "")}`} target="_blank" rel="noreferrer">Open in OSM</a></div>
+            <div
+              style={{
+                padding: 10,
+                borderRadius: 8,
+                background: "#fafafa",
+                border: "1px solid #eee",
+              }}
+            >
+              <div>
+                Map not found for this location.{" "}
+                <a
+                  href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                    session.location || ""
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open in OSM
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -260,28 +345,59 @@ export default function SessionDetails() {
           <li key={a.attendanceCode} className="attendee-item">
             <span>{a.name}</span>
             <div>
-              <button className="remove-small" onClick={() => managerRemove(a.attendanceCode, a.name)}>Remove</button>
+              <button
+                className="remove-small"
+                onClick={() => managerRemove(a.attendanceCode, a.name)}
+              >
+                Remove
+              </button>
             </div>
           </li>
         ))}
       </ul>
 
       <div className="controls">
+        <h3>Join Session</h3>
         <div className="inline">
-          <input className="text-input" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-          <button className="btn" onClick={join}>Join</button>
+          <input
+            className="text-input"
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button className="btn" onClick={join}>
+            Join
+          </button>
         </div>
 
-        <div className="inline" style={{ marginTop: 8 }}>
-          <input className="text-input" placeholder="My attendance code" value={myCode} onChange={(e) => setMyCode(e.target.value)} />
-          <button className="btn btn-danger" onClick={leave}>Leave</button>
+        <h3 style={{ marginTop: 20 }}>Leave Session</h3>
+        <div className="inline">
+          <input
+            className="text-input"
+            placeholder="Your attendance code"
+            value={myCode}
+            onChange={(e) => setMyCode(e.target.value)}
+          />
+          <button className="btn btn-danger" onClick={leave}>
+            Leave
+          </button>
         </div>
 
-        <div style={{ marginTop: 12 }}>
-          <input className="text-input" placeholder="Manager code" value={managerCode} onChange={(e) => setManagerCode(e.target.value)} />
+        <h3 style={{ marginTop: 20 }}>Session Management</h3>
+        <div>
+          <input
+            className="text-input"
+            placeholder="Management code"
+            value={managerCode}
+            onChange={(e) => setManagerCode(e.target.value)}
+          />
           <div className="button-group" style={{ marginTop: 8 }}>
-            <button className="btn" onClick={editSession}>Edit</button>
-            <button className="btn btn-danger" onClick={deleteSession}>Delete</button>
+            <button className="btn" onClick={editSession}>
+              Edit Session
+            </button>
+            <button className="btn btn-danger" onClick={deleteSession}>
+              Delete Session
+            </button>
           </div>
         </div>
       </div>
