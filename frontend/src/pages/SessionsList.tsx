@@ -12,7 +12,9 @@ type SessionType = {
   attendees?: any[];
 };
 
-const API = "http://localhost:4000";
+const API = import.meta.env.PROD 
+  ? "https://hobby-session-backend-g4a4bxdthdfqhgek.swedencentral-01.azurewebsites.net"
+  : "http://localhost:4000";
 
 export default function SessionsList() {
   const [sessions, setSessions] = useState<SessionType[]>([]);
